@@ -11,6 +11,19 @@
       src="https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js"
       defer
     ></script>
+
+    <!-- MDL -->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <style>
+      .bottom-right {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+      }
+    </style>
   </head>
   <body>
     <!-- ---------------------------------------------------------------------------------- -->
@@ -23,8 +36,15 @@
     shadow-intensity="0.4"
     shadow-softness="0.4"
     src="scene.gltf"
-    ></model-viewer>
-    <button class="stack-top" onclick="changeCameraTarget()">Hotspot</button>
+    >
+  </model-viewer>
+  <!-- Colored FAB button -->
+  <button class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored"
+    onmouseup="changeCameraTarget()"
+    >
+    <i class="material-icons">add</i>
+  </button>
+    <!-- <button class="stack-top" onclick="changeCameraTarget()">Hotspot</button> -->
     
     <!-- ---------------------------------------------------------------------------------- -->
     <script type="module">
