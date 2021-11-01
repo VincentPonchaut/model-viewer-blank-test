@@ -18,11 +18,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <style>
-      .bottom-right {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-      }
+      .bottom-right { position: fixed; bottom: 10px; right: 10px; }
+      .bottom-left { position: fixed; bottom: 10px; left: 10px; }
+      .top-right { position: fixed; top: 10px; right: 10px; }
+      .top-left { position: fixed; top: 10px; left: 10px; }
     </style>
   </head>
   <body>
@@ -35,18 +34,75 @@
     min-field-of-view="10deg"
     shadow-intensity="0.4"
     shadow-softness="0.4"
+    touch-action="none"
     src="scene.gltf"
     >
   </model-viewer>
+  <div class="vignette"></div>
   <!-- Colored FAB button -->
-  <button class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored"
-    onmouseup="changeCameraTarget()"
-    >
-    <i class="material-icons">add</i>
-  </button>
-    <!-- <button class="stack-top" onclick="changeCameraTarget()">Hotspot</button> -->
+  <button onmouseup="changeCameraTarget()" class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
+  <button onmouseup="switchToTryOnMode()" class="bottom-left mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
+  <button onmouseup="changeAmbiance()" class="top-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
     
     <!-- ---------------------------------------------------------------------------------- -->
+    <script type = "text/javascript">
+      var hotspotIndex = 0
+      var ambianceIndex = 0
+      var modelViewer
+      var initialCameraTarget
+      
+      function changeCameraTarget() {
+        if (!modelViewer)
+          modelViewer = document.querySelector('#v');
+        if (!initialCameraTarget) 
+          initialCameraTarget = document.querySelector('#v').getCameraTarget();
+        
+        const hotspots = [
+          "1.036162190887431m 0.45048296503005636m -0.010360742858188554m",
+          "0.9145105041420883m 0.07904832035079451m -1.9739225672798495m",
+          "0.1134913113892595m 0.20652078475995328m -0.0484623126430912m"
+        ];
+        
+        // position="1.036162190887431m 0.45048296503005636m -0.010360742858188554m"
+        // document.getElementById("v").setAttribute("camera-target", "0m 0m 0m");
+        //document.getElementById("v").setAttribute("camera-target", "1.036162190887431m 0.45048296503005636m -0.010360742858188554m");
+        modelViewer.setAttribute("camera-target", hotspots[hotspotIndex]);
+        modelViewer.setAttribute("field-of-view", "10deg");
+
+        ++hotspotIndex;
+        if (hotspotIndex > hotspots.length) {
+          hotspotIndex = 0;
+          modelViewer.setAttribute("camera-target", initialCameraTarget);
+          modelViewer.setAttribute("field-of-view", "auto");
+        }
+      }
+
+      function switchToTryOnMode() {
+        console.log("switching to try on mode")
+      }
+
+      function changeAmbiance() {
+        const ambiances = [
+          "./spruit_sunrise_1k.hdr"
+          // ,"christmas_photo_studio_04_1k.hdr"
+          // ,"drachenfels_cellar_1k.hdr"
+          ,"veranda_1k.hdr"
+          ,"red_wall_1k.hdr"
+          ,"paul_lobe_haus_1k.hdr"
+          ,""
+        ];
+
+        if (!modelViewer)
+          modelViewer = document.querySelector('#v');
+
+        modelViewer.setAttribute("skybox-image", ambiances[ambianceIndex]);
+        ++ambianceIndex;
+
+        if (ambianceIndex > ambiances.length - 1) {
+          ambianceIndex = 0
+        }
+      }
+    </script>
     <script type="module">
       const modelViewer = document.querySelector("#v");
       const tapDistance = 2;
@@ -178,50 +234,19 @@
         true
       );
 
-      modelViewer.addEventListener(
-        "touchend",
-        (event) => {
-          if (event.targetTouches.length === 0) {
-            recenter(event.changedTouches[0]);
+      // modelViewer.addEventListener(
+      //   "touchend",
+      //   (event) => {
+      //     if (event.targetTouches.length === 0) {
+      //       recenter(event.changedTouches[0]);
 
-            if (event.cancelable) {
-              event.preventDefault();
-            }
-          }
-        },
-        true
-      );
-    </script>
-    <script type = "text/javascript">
-      var hotspotIndex = 0;
-      var modelViewer
-      var initialCameraTarget
-      
-      function changeCameraTarget() {
-        if (!modelViewer)
-          modelViewer = document.querySelector('#v');
-        if (!initialCameraTarget) 
-          initialCameraTarget = document.querySelector('#v').getCameraTarget();
-        
-        const hotspots = [
-          "1.036162190887431m 0.45048296503005636m -0.010360742858188554m",
-          "0.9145105041420883m 0.07904832035079451m -1.9739225672798495m",
-          "0.1134913113892595m 0.20652078475995328m -0.0484623126430912m"
-        ];
-        
-        // position="1.036162190887431m 0.45048296503005636m -0.010360742858188554m"
-        // document.getElementById("v").setAttribute("camera-target", "0m 0m 0m");
-        //document.getElementById("v").setAttribute("camera-target", "1.036162190887431m 0.45048296503005636m -0.010360742858188554m");
-        modelViewer.setAttribute("camera-target", hotspots[hotspotIndex]);
-        modelViewer.setAttribute("field-of-view", "10deg");
-
-        ++hotspotIndex;
-        if (hotspotIndex > hotspots.length) {
-          hotspotIndex = 0;
-          modelViewer.setAttribute("camera-target", initialCameraTarget);
-          modelViewer.setAttribute("field-of-view", "auto");
-        }
-      }
+      //       if (event.cancelable) {
+      //         event.preventDefault();
+      //       }
+      //     }
+      //   },
+      //   true
+      // );
     </script>
     <script src="script.js"></script>
     <!-- Loads <model-viewer> for browsers: -->
