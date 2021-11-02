@@ -22,10 +22,28 @@
       .bottom-left { position: fixed; bottom: 10px; left: 10px; }
       .top-right { position: fixed; top: 10px; right: 10px; }
       .top-left { position: fixed; top: 10px; left: 10px; }
+
+      #container {
+        margin: 0px auto;
+        position: fixed;
+        top: 0; 
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #videoElement {
+        width: fit-content;
+        height: 100%;
+        background-color: #666;
+      }
     </style>
   </head>
   <body>
     <!-- ---------------------------------------------------------------------------------- -->
+    <div id="container">
+      <video autoplay="true" id="videoElement">
+      </video>
+    </div>
     <model-viewer 
       id="v" 
       bounds="tight" 
@@ -37,13 +55,14 @@
       touch-action="none" 
       src="scene.gltf">
     </model-viewer>
-  <div class="vignette"></div>
+  <div id="vignetteEffect" class="vignette"></div>
   <div style="width: 40px;" class="bottom-right">
     <button onmouseup="resetCamera()" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white" style="display: block; margin-bottom: 4px;"><i class="material-icons">add</i></button>
     <button onmouseup="changeCameraTarget()" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white" style="display: block; margin-bottom: 4px;"><i class="material-icons">add</i></button>
   </div>
   <!-- <button onmouseup="changeCameraTarget()" class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button> -->
-  <button onmouseup="switchToTryOnMode()" class="bottom-left mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
+  <button onmouseup="switchToTryOnMode()"  class="bottom-left mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
+  <button onmouseup="switchToViewerMode()" class="bottom-left mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white" id="switchToViewerBtn" style="display: none;"><i class="material-icons">add</i></button>
   <button onmouseup="changeAmbiance()" class="top-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
     
     <!-- ---------------------------------------------------------------------------------- -->
@@ -57,6 +76,27 @@
       //   initialOrbit = modelViewer.getCameraOrbit();
       //   console.log("loaded");
       // });
+
+      var video = document.querySelector("#videoElement");
+
+      if (navigator.mediaDevices.getUserMedia) {
+        
+        
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+          
+          console.log("HERE:", video.scrollWidth, video.scrollHeight);
+          
+          
+          
+        })
+        .catch(function (err0r) {
+          console.log("Something went wrong!");
+        });
+        
+      }
+
       function pauseTurntableRotation() {
         // This pauses turntable rotation
         modelViewer.dispatchEvent(
@@ -95,12 +135,38 @@
         modelViewer.cameraOrbit = "auto auto auto";
         modelViewer.setAttribute("field-of-view", "auto");
         hotspotIndex = 0;
-
       }
 
       function switchToTryOnMode() {
         console.log("switching to try on mode")
-        modelViewer.ar
+        let vignetteObject = document.querySelector("#vignetteEffect");
+
+        // change video size
+        let w = ((video.videoWidth * video.scrollHeight) / video.videoHeight)
+        let offset = (-w/2) + modelViewer.scrollWidth / 2;
+        video.style.position = 'absolute';
+        video.style.width = `${w}px`;
+        video.style.left = `${offset}px`;
+
+        modelViewer.style="background-color: unset;"
+        modelViewer.setAttribute('max-field-of-view', '120deg');
+        if (vignetteObject)
+          vignetteObject.style='display:none;';
+
+        // hide buttons
+        document.querySelectorAll('button').forEach((button) => button.style.display = 'none');
+        document.querySelector('#switchToViewerBtn').style.display = 'block';
+      }
+
+      function switchToViewerMode() {
+        console.log("switching to viewer mode")
+
+        document.querySelector("#vignetteEffect").display = 'block';
+        modelViewer.style="background-color: #ffffff;"
+        modelViewer.setAttribute('max-field-of-view', 'auto');
+
+        document.querySelectorAll('button').forEach((button) => button.style.display = 'block');
+        document.querySelector('#switchToViewerBtn').style.display = 'none';
       }
 
       function changeAmbiance() {
@@ -126,6 +192,51 @@
           ambianceIndex = 0
         }
       }
+
+      // // VIDEO 
+      // (function() {
+
+      // var streaming = false,
+      //     video        = document.querySelector('#videoElement'),
+      //     cover        = document.querySelector('#cover'),
+      //     width = 0,
+      //     height = 600;
+
+      // navigator.getMedia = ( navigator.getUserMedia ||
+      //                       navigator.webkitGetUserMedia ||
+      //                       navigator.mozGetUserMedia ||
+      //                       navigator.msGetUserMedia);
+
+      // navigator.getMedia(
+      //   {
+      //     video: true,
+      //     audio: false
+      //   },
+      //   function(stream) {
+      //     if (navigator.mozGetUserMedia) {
+      //       video.mozSrcObject = stream;
+      //     } else {
+      //       var vendorURL = window.URL || window.webkitURL;
+      //       // video.src = vendorURL.createObjectURL(stream);
+      //       video.srcObject = stream;
+      //     }
+      //     video.play();
+      //   },
+      //   function(err) {
+      //     console.log("An error occured! " + err);
+      //   }
+      // );
+
+      // video.addEventListener('canplay', function(ev){
+      //   if (!streaming) {
+      //     width = video.videoWidth / (video.videoHeight/height);
+      //     video.setAttribute('width', width);
+      //     video.setAttribute('height', height);
+      //     streaming = true;
+      //   }
+      // }, false);
+
+      // })();
     </script>
     <script type="module">
       const modelViewer = document.querySelector("#v");
