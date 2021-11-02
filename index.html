@@ -156,6 +156,9 @@
         // hide buttons
         document.querySelectorAll('button').forEach((button) => button.style.display = 'none');
         document.querySelector('#switchToViewerBtn').style.display = 'block';
+
+        modelViewer.setAttribute('skybox-image', "");
+        ambianceIndex = 0;
       }
 
       function switchToViewerMode() {
@@ -167,6 +170,8 @@
 
         document.querySelectorAll('button').forEach((button) => button.style.display = 'block');
         document.querySelector('#switchToViewerBtn').style.display = 'none';
+
+        ambianceIndex = 0;
       }
 
       function changeAmbiance() {
