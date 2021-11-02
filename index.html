@@ -26,59 +26,81 @@
   </head>
   <body>
     <!-- ---------------------------------------------------------------------------------- -->
-    <model-viewer
-    id="v"
-    bounds="tight"
-    camera-controls
-    oncontextmenu="return false;"
-    min-field-of-view="10deg"
-    shadow-intensity="0.4"
-    shadow-softness="0.4"
-    touch-action="none"
-    src="scene.gltf"
-    >
-  </model-viewer>
+    <model-viewer 
+      id="v" 
+      bounds="tight" 
+      camera-controls 
+      auto-rotate
+      min-field-of-view="10deg"
+      shadow-intensity="0.4" shadow-softness="0.4" 
+      oncontextmenu="return false;" 
+      touch-action="none" 
+      src="scene.gltf">
+    </model-viewer>
   <div class="vignette"></div>
-  <!-- Colored FAB button -->
-  <button onmouseup="changeCameraTarget()" class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
+  <div style="width: 40px;" class="bottom-right">
+    <button onmouseup="resetCamera()" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white" style="display: block; margin-bottom: 4px;"><i class="material-icons">add</i></button>
+    <button onmouseup="changeCameraTarget()" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white" style="display: block; margin-bottom: 4px;"><i class="material-icons">add</i></button>
+  </div>
+  <!-- <button onmouseup="changeCameraTarget()" class="bottom-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button> -->
   <button onmouseup="switchToTryOnMode()" class="bottom-left mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
   <button onmouseup="changeAmbiance()" class="top-right mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-color--white"><i class="material-icons">add</i></button>
     
     <!-- ---------------------------------------------------------------------------------- -->
-    <script type = "text/javascript">
-      var hotspotIndex = 0
-      var ambianceIndex = 0
-      var modelViewer
-      var initialCameraTarget
-      
+    <script>
+      let modelViewer = document.querySelector('#v');
+      let initialOrbit
+      let hotspotIndex = 0
+      let ambianceIndex = 0
+
+      // modelViewer.addEventListener('load', (event) => {
+      //   initialOrbit = modelViewer.getCameraOrbit();
+      //   console.log("loaded");
+      // });
+      function pauseTurntableRotation() {
+        // This pauses turntable rotation
+        modelViewer.dispatchEvent(
+          new CustomEvent("camera-change", {
+            detail: { source: "user-interaction" },
+          })
+        );
+      }
+            
       function changeCameraTarget() {
-        if (!modelViewer)
-          modelViewer = document.querySelector('#v');
-        if (!initialCameraTarget) 
-          initialCameraTarget = document.querySelector('#v').getCameraTarget();
-        
         const hotspots = [
           "1.036162190887431m 0.45048296503005636m -0.010360742858188554m",
           "0.9145105041420883m 0.07904832035079451m -1.9739225672798495m",
           "0.1134913113892595m 0.20652078475995328m -0.0484623126430912m"
         ];
         
-        // position="1.036162190887431m 0.45048296503005636m -0.010360742858188554m"
-        // document.getElementById("v").setAttribute("camera-target", "0m 0m 0m");
-        //document.getElementById("v").setAttribute("camera-target", "1.036162190887431m 0.45048296503005636m -0.010360742858188554m");
         modelViewer.setAttribute("camera-target", hotspots[hotspotIndex]);
         modelViewer.setAttribute("field-of-view", "10deg");
 
+        pauseTurntableRotation()
+
         ++hotspotIndex;
         if (hotspotIndex > hotspots.length) {
-          hotspotIndex = 0;
-          modelViewer.setAttribute("camera-target", initialCameraTarget);
-          modelViewer.setAttribute("field-of-view", "auto");
+          resetCamera()
         }
+      }
+
+
+      function resetCamera() {
+        pauseTurntableRotation()
+        modelViewer.turntableRotation = 0;
+        modelViewer.resetTurntableRotation()
+        // modelViewer.orientation = '0deg 0deg 0deg'
+
+        modelViewer.setAttribute("camera-target", "auto auto auto");
+        modelViewer.cameraOrbit = "auto auto auto";
+        modelViewer.setAttribute("field-of-view", "auto");
+        hotspotIndex = 0;
+
       }
 
       function switchToTryOnMode() {
         console.log("switching to try on mode")
+        modelViewer.ar
       }
 
       function changeAmbiance() {
@@ -94,6 +116,8 @@
 
         if (!modelViewer)
           modelViewer = document.querySelector('#v');
+        
+        modelViewer.autoRotate = (ambianceIndex == ambiances.length - 1);
 
         modelViewer.setAttribute("skybox-image", ambiances[ambianceIndex]);
         ++ambianceIndex;
